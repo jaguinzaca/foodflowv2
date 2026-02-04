@@ -1,0 +1,316 @@
+{% extends 'comun/esquema.html' %}
+{% block title %}Cocina - FoodFlow{% endblock %}
+
+{% block content %}
+<style>
+    /* --- ESTILOS KDS (Dark Mode) --- */
+    body {
+        background-color: #111827; /* Fondo oscuro igual que el header */
+        color: #f3f4f6;
+    }
+    
+    .kds-header {
+        border-bottom: 1px solid #374151;
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Tarjeta de Pedido Base */
+    .ticket-card {
+        background-color: #1f2937; /* Gris oscuro para las tarjetas */
+        border: 1px solid #374151;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        transition: transform 0.2s;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Encabezado del Ticket */
+    .ticket-header {
+        background-color: #374151;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #4b5563;
+    }
+
+    .table-number {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: white;
+    }
+
+    .timer-badge {
+        background: #111827;
+        color: #fbbf24; /* Amarillo reloj */
+        padding: 5px 12px;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace; /* Fuente tipo reloj digital */
+        font-weight: bold;
+        font-size: 1.1rem;
+        border: 1px solid #4b5563;
+    }
+
+    /* Cuerpo del Ticket */
+    .ticket-body {
+        padding: 1.2rem;
+        flex-grow: 1;
+    }
+
+    .item-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.8rem;
+        border-bottom: 1px dashed #374151;
+        padding-bottom: 0.8rem;
+    }
+    .item-qty {
+        color: var(--brand-orange);
+        font-weight: 800;
+        font-size: 1.2rem;
+        margin-right: 8px;
+        min-width: 30px;
+    }
+    .item-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #e5e7eb;
+        line-height: 1.2;
+    }
+    .item-note {
+        display: block;
+        background-color: rgba(249, 115, 22, 0.15); /* Fondo naranja suave */
+        color: #fdba74; /* Texto naranja claro */
+        font-size: 0.85rem;
+        padding: 4px 8px;
+        border-radius: 6px;
+        margin-top: 4px;
+        border-left: 3px solid var(--brand-orange);
+    }
+
+    /* Notas Generales */
+    .general-note {
+        background-color: #3730a3; /* Azul oscuro */
+        color: #c7d2fe;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* Footer y Botón */
+    .ticket-footer {
+        padding: 1rem;
+        background-color: #1f2937;
+        border-top: 1px solid #374151;
+    }
+    
+    .btn-ready {
+        width: 100%;
+        background-color: #10b981; /* Verde éxito */
+        color: white;
+        font-weight: 800;
+        padding: 12px;
+        border-radius: 12px;
+        border: none;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: 0.2s;
+    }
+    .btn-ready:hover {
+        background-color: #059669;
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+    }
+
+    /* --- ESTADOS PRIORITARIOS --- */
+    
+    /* Estado: URGENTE (Rojo) */
+    .is-urgent {
+        border: 2px solid #ef4444;
+        box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+        animation: pulse-red 2s infinite;
+    }
+    .is-urgent .ticket-header {
+        background-color: #7f1d1d; /* Rojo oscuro header */
+    }
+    .is-urgent .timer-badge {
+        color: #ef4444;
+        border-color: #ef4444;
+    }
+    
+    @keyframes pulse-red {
+        0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    /* Estado: PEDIDO ANTIGUO (Parpadeo Suave) */
+    .is-old {
+        border: 1px solid #eab308; /* Amarillo */
+    }
+    .is-old .timer-badge {
+        animation: blink 1s infinite;
+        background-color: #422006;
+        color: #facc15;
+    }
+    
+    @keyframes blink { 50% { opacity: 0.5; } }
+
+</style>
+
+<div class="container-fluid px-4 py-4">
+    
+    <div class="d-flex justify-content-between align-items-center kds-header">
+        <div>
+            <h2 class="fw-bold text-white m-0"><i class="bi bi-fire text-warning me-2"></i>Monitor de Cocina</h2>
+            <p class="text-secondary m-0 small">Pedidos ordenados por llegada (FIFO)</p>
+        </div>
+        <div class="d-flex gap-2">
+            <div class="text-end me-3 d-none d-md-block">
+                <div class="h4 fw-bold text-white m-0" id="clock-main">00:00</div>
+                <small class="text-secondary">Hora Actual</small>
+            </div>
+            <button class="btn btn-outline-secondary text-white border-secondary" onclick="location.reload()">
+                <i class="bi bi-arrow-clockwise me-1"></i> Actualizar
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-4" id="grid-pedidos">
+        {% for pedido in pedidos %}
+        <div class="col-12 col-md-6 col-xl-3">
+            
+            <div class="ticket-card {% if pedido.es_urgente %}is-urgent{% endif %}" 
+                 data-timestamp="{{ pedido.creado_en|date:'c' }}" id="card-{{ pedido.id }}">
+                
+                <div class="ticket-header">
+                    <div>
+                        <span class="text-secondary small fw-bold d-block text-uppercase">Mesa</span>
+                        <span class="table-number">{{ pedido.mesa.numero }}</span>
+                    </div>
+                    <div class="text-end">
+                        <div class="timer-badge" id="timer-{{ pedido.id }}">00:00</div>
+                        {% if pedido.es_urgente %}
+                        <small class="text-danger fw-bold d-block mt-1" style="font-size: 0.7rem;">🔥 URGENTE</small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="ticket-body">
+                    {% for detalle in pedido.detalles.all %}
+                    <div class="item-row">
+                        <div class="d-flex">
+                            <span class="item-qty">{{ detalle.cantidad }}</span>
+                            <div>
+                                <span class="item-name">{{ detalle.producto.nombre }}</span>
+                                {% if detalle.nota %}
+                                <span class="item-note"><i class="bi bi-pencil-fill me-1" style="font-size:0.7rem"></i>{{ detalle.nota }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    {% if pedido.nota_general %}
+                    <div class="general-note">
+                        <i class="bi bi-exclamation-circle-fill text-warning fs-5"></i>
+                        <span>{{ pedido.nota_general }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="ticket-footer mt-auto">
+                    <button class="btn-ready shadow" onclick="marcarListo('{{ pedido.id }}')">
+                        <i class="bi bi-check-lg me-2"></i> Pedido Listo
+                    </button>
+                </div>
+            </div>
+
+        </div>
+        {% empty %}
+        <div class="col-12 text-center" style="margin-top: 100px;">
+            <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem; opacity: 0.2;"></i>
+            <h3 class="text-secondary mt-3">Todo en orden, Chef.</h3>
+            <p class="text-muted">No hay pedidos pendientes.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    // --- 1. RELOJ PRINCIPAL ---
+    setInterval(() => {
+        const now = new Date();
+        document.getElementById('clock-main').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }, 1000);
+
+    // --- 2. TEMPORIZADORES DE PEDIDOS (Contador de tiempo transcurrido) ---
+    function updateTimers() {
+        const cards = document.querySelectorAll('.ticket-card');
+        const now = new Date();
+
+        cards.forEach(card => {
+            const createdStr = card.getAttribute('data-timestamp');
+            const created = new Date(createdStr);
+            const diffMs = now - created;
+            const diffMins = Math.floor(diffMs / 60000);
+            
+            // Calcular MM:SS
+            const minutes = Math.floor(diffMs / 60000);
+            const seconds = Math.floor((diffMs % 60000) / 1000);
+            const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Actualizar texto
+            const timerBadge = card.querySelector('.timer-badge');
+            timerBadge.innerText = timeString;
+
+            // LÓGICA DE PEDIDO ANTIGUO (> 15 minutos)
+            // Si no es urgente pero lleva mucho tiempo, se marca como "Old" (amarillo parpadeante)
+            if (diffMins >= 15 && !card.classList.contains('is-urgent')) {
+                card.classList.add('is-old');
+            }
+        });
+    }
+
+    // Actualizar timers cada segundo
+    setInterval(updateTimers, 1000);
+    updateTimers(); // Ejecutar inmediatamente al cargar
+
+    // --- 3. MARCAR LISTO (API) ---
+    function marcarListo(id) {
+        if(!confirm("¿Confirmar que el pedido está completo?")) return;
+        
+        // Animación de salida
+        const card = document.getElementById(`card-${id}`);
+        card.style.transform = "scale(0.9)";
+        card.style.opacity = "0";
+
+        // Llamada al Backend
+        fetch(`/api/pedido/${id}/listo/`, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'updated') {
+                setTimeout(() => card.parentElement.remove(), 300);
+            }
+        })
+        .catch(err => {
+            alert("Error de conexión");
+            card.style.transform = "scale(1)";
+            card.style.opacity = "1";
+        });
+    }
+
+    // Recarga automática de seguridad cada 60s para asegurar sincronización
+    setTimeout(() => location.reload(), 60000);
+
+</script>
+{% endblock %}

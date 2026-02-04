@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitectura del Sistema FoodFlow</title>
+    <!-- Fuente Google Inter para un look moderno -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #0f172a;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 2.5rem;
+        }
+        p.subtitle {
+            color: #64748b;
+            margin-bottom: 50px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        .diagram-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 60px;
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .diagram-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #f97316; /* Naranja FoodFlow */
+            display: inline-block;
+        }
+        .diagram-desc {
+            margin-bottom: 30px;
+            color: #475569;
+            text-align: center;
+            max-width: 80%;
+            line-height: 1.6;
+        }
+        /* Ajuste para que los diagramas no se desborden */
+        .mermaid {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        footer {
+            margin-top: 40px;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>FoodFlow System</h1>
+    <p class="subtitle">Diagramas de Arquitectura y Flujo de Datos</p>
+
+    <!-- DIAGRAMA 1: FLUJO DEL PEDIDO -->
+    <div class="diagram-container">
+        <h2 class="diagram-title">1. Flujo del Pedido (Paso a Paso)</h2>
+        <p class="diagram-desc">Este diagrama muestra la interacción cronológica desde que el cliente solicita un plato hasta que el mesero lo entrega, pasando por el procesamiento en cocina.</p>
+        
+        <div class="mermaid">
+            sequenceDiagram
+                autonumber
+                actor Cliente
+                participant Mesero as 📱 Tablet Mesero
+                participant Backend as ⚙️ Servidor Django
+                participant Cocina as 📺 Monitor Cocina
+
+                Note over Cliente, Mesero: 1. Inicio del Servicio
+                Cliente->>Mesero: Ordena comida
+                Mesero->>Backend: Envía Pedido (API)
+                
+                rect rgb(240, 253, 250)
+                    Note right of Backend: Procesamiento
+                    Backend->>Backend: Guarda en Base de Datos
+                    Backend-->>Mesero: Confirma (Estado: Esperando)
+                end
+                
+                Backend->>Cocina: Aparece Comanda (Tiempo Real)
+                
+                Note over Cocina: 2. Producción
+                Cocina->>Cocina: Prepara alimentos
+                Cocina->>Backend: Marca "Listo"
+                
+                rect rgb(255, 247, 237)
+                    Note left of Cocina: Notificación
+                    Backend->>Backend: Actualiza Estado Mesa
+                    Backend-->>Mesero: Alerta Visual (Mesa Azul)
+                end
+                
+                Mesero->>Cliente: Entrega el pedido
+        </div>
+    </div>
+
+    <!-- DIAGRAMA 2: ARQUITECTURA TÉCNICA -->
+    <div class="diagram-container">
+        <h2 class="diagram-title">2. Arquitectura del Sistema</h2>
+        <p class="diagram-desc">Estructura técnica que muestra cómo se comunican las interfaces (Frontend) con el servidor (Backend) y dónde se guardan los datos.</p>
+        
+        <div class="mermaid">
+            graph TD
+                %% Estilos
+                classDef client fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0c4a6e;
+                classDef server fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d;
+                classDef db fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#581c87;
+
+                subgraph FRONTEND ["🖥️ Capa de Cliente (Navegador)"]
+                    direction TB
+                    UI_Mesero[📱 App Mesero<br/>(HTML/JS/CSS)]:::client
+                    UI_Cocina[📺 Monitor Cocina<br/>(KDS)]:::client
+                    UI_Admin[🛠️ Panel Admin<br/>(Gestión)]:::client
+                end
+
+                subgraph BACKEND ["⚙️ Capa de Servidor (Django)"]
+                    direction TB
+                    URLs[Enrutador<br/>(urls.py)]:::server
+                    Logica[Lógica de Negocio<br/>(views.py)]:::server
+                    Auth[Seguridad<br/>(Auth System)]:::server
+                end
+
+                subgraph DATOS ["💾 Capa de Datos"]
+                    SQLite[(Base de Datos<br/>SQLite3)]:::db
+                    Media[Archivos Media<br/>(Fotos Platos)]:::db
+                end
+
+                %% Relaciones
+                UI_Mesero <-->|HTTP / JSON| URLs
+                UI_Cocina <-->|HTTP / JSON| URLs
+                UI_Admin <-->|HTTP| URLs
+
+                URLs --> Auth
+                Auth --> Logica
+                Logica <-->|ORM| SQLite
+                Logica -.->|Lee/Escribe| Media
+        </div>
+    </div>
+
+    <!-- DIAGRAMA 3: CASOS DE USO -->
+    <div class="diagram-container">
+        <h2 class="diagram-title">3. Roles y Funciones</h2>
+        <p class="diagram-desc">Mapa de permisos que detalla qué acciones puede realizar cada tipo de usuario dentro de FoodFlow.</p>
+        
+        <div class="mermaid">
+            graph LR
+                %% Actores
+                Admin((👤 Admin))
+                style Admin fill:#f97316,color:white,stroke:none
+                Mesero((📱 Mesero))
+                style Mesero fill:#3b82f6,color:white,stroke:none
+                Cocinero((👨‍🍳 Chef))
+                style Cocinero fill:#10b981,color:white,stroke:none
+
+                %% Sistema
+                subgraph SISTEMA ["Sistema FoodFlow"]
+                    direction TB
+                    Login[Iniciar Sesión]
+                    
+                    subgraph GESTION [Gestión]
+                        Crear[Crear Productos]
+                        Fotos[Subir Fotos]
+                    end
+                    
+                    subgraph VENTA [Operación]
+                        Pedido[Crear Pedido]
+                        Mesa[Ver Estado Mesa]
+                    end
+                    
+                    subgraph PROD [Producción]
+                        Ver[Ver Comandas]
+                        Listo[Marcar Listo]
+                    end
+                end
+
+                %% Conexiones
+                Admin --> Login
+                Mesero --> Login
+                Cocinero --> Login
+
+                Admin --> GESTION
+                Mesero --> VENTA
+                Cocinero --> PROD
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2026 FoodFlow Project. Generado para exposición.
+    </footer>
+
+    <!-- Librería Mermaid JS para renderizar los gráficos -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+</body>
+</html>

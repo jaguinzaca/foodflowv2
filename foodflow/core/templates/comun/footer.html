@@ -1,0 +1,43 @@
+<style>
+    .footer-custom {
+        background-color: var(--brand-dark); /* Mismo negro del header */
+        color: #9ca3af; /* Texto gris suave para no cansar la vista */
+        border-top: 1px solid var(--brand-orange); /* Línea de acento naranja */
+        font-size: 0.85rem;
+    }
+    
+    .footer-brand {
+        color: white;
+        font-weight: 700;
+    }
+
+    /* Etiqueta de versión discreta */
+    .version-badge {
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #d1d5db;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+</style>
+
+<footer class="footer-custom mt-auto py-4">
+    <div class="container-fluid px-4">
+        <div class="row align-items-center gy-2">
+            
+            <div class="col-md-6 text-center text-md-start">
+                <span>&copy; 2026 <span class="footer-brand">FoodFlow</span>.</span>
+                <span class="d-none d-sm-inline"> | Gestion de pedidos.</span>
+            </div>
+
+            <div class="col-md-6 text-center text-md-end">
+                <span class="version-badge">
+                    <i class="bi bi-code-slash me-1 text-warning"></i> Version de prueba xd
+                </span>
+            </div>
+            
+        </div>
+    </div>
+</footer>

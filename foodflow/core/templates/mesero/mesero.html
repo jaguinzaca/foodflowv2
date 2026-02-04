@@ -1,0 +1,535 @@
+{% extends 'comun/esquema.html' %}
+{% block title %}Mesero - FoodFlow{% endblock %}
+
+{% block content %}
+<style>
+    /* --- ESTILOS MESERO POS (ACTUALIZADOS) --- */
+    
+    /* Área Principal (Menú) */
+    .menu-section {
+        background-color: #f3f4f6;
+        padding-right: 15px;
+        border-right: 1px solid #e5e7eb;
+    }
+
+    /* Buscador */
+    .search-container {
+        position: relative;
+    }
+    .search-input {
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 50px;
+        padding: 0.8rem 1rem 0.8rem 2.5rem;
+        width: 100%;
+        transition: 0.2s;
+    }
+    .search-input:focus {
+        border-color: var(--brand-orange);
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+    }
+
+    /* Categorías */
+    .cat-btn {
+        background: white;
+        border: 1px solid #e5e7eb;
+        color: #6b7280;
+        padding: 10px 20px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: 0.2s;
+        white-space: nowrap;
+        cursor: pointer;
+    }
+    .cat-btn:hover { background: #f9fafb; transform: translateY(-1px); }
+    .cat-btn.active {
+        background: var(--brand-dark);
+        color: var(--brand-orange);
+        border-color: var(--brand-dark);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    /* Tarjetas de Producto */
+    .product-card {
+        border: none;
+        border-radius: 16px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+        background: white;
+        overflow: hidden;
+    }
+    .product-card:active { transform: scale(0.96); }
+    .product-card:hover {
+        box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.1);
+        transform: translateY(-3px);
+    }
+    .price-tag {
+        color: var(--brand-orange);
+        font-weight: 800;
+        font-size: 1.2rem;
+    }
+    .add-btn-mini {
+        background: var(--brand-orange);
+        color: white;
+        border-radius: 50%;
+        width: 36px; height: 36px;
+        display: flex; align-items: center; justify-content: center;
+        transition: 0.2s;
+        box-shadow: 0 2px 5px rgba(249, 115, 22, 0.3);
+    }
+
+    /* --- SIDEBAR DERECHO (TICKET MÁS ANCHO) --- */
+    .ticket-sidebar {
+        background: white;
+        height: calc(100vh - 70px); /* Altura total menos header */
+        position: sticky;
+        top: 70px;
+        display: flex;
+        flex-direction: column;
+        z-index: 100;
+    }
+
+    .ticket-header {
+        background: var(--brand-dark);
+        color: white;
+        padding: 1.2rem 1.5rem;
+        border-bottom: 4px solid var(--brand-orange);
+    }
+
+    .ticket-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1.5rem; /* Más padding interno */
+        background: #fff;
+    }
+
+    .ticket-item {
+        background: #f8fafc;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 1rem;
+        margin-bottom: 0.8rem;
+        animation: slideIn 0.2s;
+    }
+    @keyframes slideIn { from {opacity:0; transform:translateX(10px);} to {opacity:1; transform:translateX(0);} }
+
+    .ticket-footer {
+        background: #fff;
+        padding: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.05); /* Sombra hacia arriba */
+    }
+
+    /* Selector de Mesas */
+    .mesa-selector { 
+        min-height: 120px; 
+        border-radius: 16px; 
+        cursor: pointer; 
+        transition: 0.2s; 
+        border: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
+    }
+    .mesa-selector:hover { transform: translateY(-3px); box-shadow: 0 10px 15px rgba(0,0,0,0.1) !important; }
+    
+    /* Estados Visuales Mesas */
+    .mesa-libre { background: #ecfdf5; color: #047857; border-color: #10b981; }
+    .mesa-ocupada { background: #f3f4f6; color: #4b5563; border-color: #9ca3af; opacity: 0.8; }
+    .mesa-esperando { background: #fff7ed; color: #c2410c; border-color: #f97316; }
+    .mesa-lista { background: #eff6ff; color: #1d4ed8; border-color: #3b82f6; animation: pulse 2s infinite; }
+
+    /* Badge del Mesero (Nuevo) */
+    .waiter-badge {
+        background: white;
+        padding: 8px 16px;
+        border-radius: 50px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        border: 1px solid #e5e7eb;
+        font-size: 0.9rem;
+        color: #374151;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* --- AJUSTES PARA TICKET GRANDE (BIG MODE) --- */
+    .ticket-item-large {
+        padding: 2.5rem !important; /* Más espacio interno */
+        border: 1px solid #cbd5e1;
+    }
+    .item-name-big {
+        font-size: 1.3rem; /* Nombre del plato GRANDE */
+        font-weight: 800;
+        color: #1e293b;
+    }
+    .item-price-big {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--brand-orange);
+    }
+    .input-nota-big {
+        font-size: 1rem !important; /* Texto de la nota más legible */
+        padding: 10px !important;
+    }
+    .btn-trash-big {
+        width: 50px; /* Botón de borrar más ancho para dedos grandes */
+        font-size: 1.2rem;
+    }
+</style>
+
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        
+       <div id="columna-menu" class="col-lg-7 menu-section p-4 h-100 overflow-auto transition-all"> <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <h3 class="fw-bold text-dark m-0" id="titulo-seccion">
+                <i class="bi bi-grid-fill text-warning me-2"></i>Selecciona una Mesa
+            </h3>
+            <button id="btn-abrir-ticket" class="btn btn-dark btn-sm rounded-pill px-3 d-none fade-in" onclick="toggleTicket()">
+                <i class="bi bi-receipt me-1"></i> Ver Orden
+            </button>
+        </div>
+                
+                
+                <div class="waiter-badge">
+                    <div class="rounded-circle bg-warning text-dark d-flex justify-content-center align-items-center fw-bold" style="width: 28px; height: 28px;">
+                        {{ user.username|first|upper }}
+                    </div>
+                    <span>Atiende: <strong>{{ user.username|title }}</strong></span>
+                </div>
+            </div>
+
+            <div id="vista-mesas" class="fade-in">
+                <div class="row g-3">
+                    {% for mesa in mesas %}
+                    <div class="col-6 col-md-6 col-xl-4"> <div class="card mesa-selector d-flex justify-content-center align-items-center mesa-{{ mesa.estado }} shadow-sm" 
+                             onclick="abrirMesa('{{ mesa.id }}', '{{ mesa.numero }}')">
+                            
+                            <i class="bi bi-person-workspace position-absolute" style="font-size: 5rem; opacity: 0.05;"></i>
+                            
+                            <h2 class="fw-bold m-0 z-1">Mesa {{ mesa.numero }}</h2>
+                            
+                            <div class="mt-2 z-1">
+                                <span class="badge rounded-pill text-uppercase border shadow-sm px-3 py-2
+                                    {% if mesa.estado == 'libre' %}bg-success text-white border-success
+                                    {% elif mesa.estado == 'ocupada' %}bg-secondary text-white border-secondary
+                                    {% elif mesa.estado == 'lista' %}bg-primary text-white border-primary
+                                    {% else %}bg-warning text-dark border-warning{% endif %}">
+                                    
+                                    {% if mesa.estado == 'lista' %}
+                                        <i class="bi bi-bell-fill me-1"></i> ¡LISTO!
+                                    {% elif mesa.estado == 'libre' %}
+                                        <i class="bi bi-check-circle me-1"></i> DISPONIBLE
+                                    {% elif mesa.estado == 'ocupada' %}
+                                        <i class="bi bi-slash-circle me-1"></i> OCUPADA
+                                    {% else %}
+                                        <i class="bi bi-clock me-1"></i> ESPERANDO
+                                    {% endif %}
+                                </span>
+                            </div>
+
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div id="vista-menu" class="d-none">
+                <div class="d-flex align-items-center gap-3 mb-4 sticky-top bg-light py-2" style="z-index: 10;">
+                    <button class="btn btn-white border shadow-sm rounded-circle p-2 text-secondary" onclick="volverAMesas()">
+                        <i class="bi bi-arrow-left fs-4"></i>
+                    </button>
+                    
+                    <div class="search-container flex-grow-1">
+                        <i class="bi bi-search position-absolute text-muted" style="left: 1rem; top: 50%; transform: translateY(-50%);"></i>
+                        <input type="text" id="buscador" class="search-input" placeholder="Buscar un producto..." onkeyup="filtrarProductos()">
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 overflow-auto pb-3 mb-3">
+                    <button class="cat-btn active" onclick="filtrarCat('todas', this)">Todas</button>
+                    {% for cat in categorias %}
+                    <button class="cat-btn" onclick="filtrarCat('cat-{{ cat.id }}', this)">
+                        {% if cat.nombre == 'Bebidas' %}🥤{% elif cat.nombre == 'Hamburguesas' %}🍔{% else %}🍽️{% endif %} 
+                        {{ cat.nombre }}
+                    </button>
+                    {% endfor %}
+                </div>
+
+                <div class="row g-3">
+                    {% for cat in categorias %}
+                        {% for prod in cat.productos.all %}
+                        <div class="col-6 col-md-4 col-xl-4 producto-item cat-{{ cat.id }}" data-name="{{ prod.nombre|lower }}">
+                            <div class="card product-card h-100 shadow-sm p-3 position-relative" 
+                                 onclick="agregarAlCarrito('{{ prod.id }}', '{{ prod.nombre }}', '{{ prod.precio }}')">
+                                
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                   <div class="overflow-hidden rounded-3 mb-2 d-flex align-items-center justify-content-center bg-light" style="height: 120px; width: 100%;">
+    {% if prod.imagen %}
+        <img src="{{ prod.imagen.url }}" alt="{{ prod.nombre }}" style="width: 100%; height: 100%; object-fit: cover;">
+    {% else %}
+        <i class="bi bi-camera-fill text-secondary fs-1 opacity-25"></i>
+    {% endif %}
+</div>
+                                    <div class="add-btn-mini"><i class="bi bi-plus-lg"></i></div>
+                                </div>
+                                
+                          <h6 class="fw-bold text-dark mb-1">{{ prod.nombre }}</h6>
+{% if prod.descripcion %}
+                         <p class="text-muted small m-0 mb-2" style="font-size: 0.8rem; line-height: 1.2;">
+{{ prod.descripcion|truncatechars:45 }}
+    </p>
+{% else %}
+    <div class="mb-2" style="height: 18px;"></div>
+{% endif %}
+
+<div class="price-tag">${{ prod.precio }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div id="columna-ticket" class="col-lg-5 p-0 transition-all"> <div class="ticket-sidebar shadow-lg">
+        
+        <div class="ticket-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <button class="btn btn-sm btn-outline-light border-0 me-2" onclick="toggleTicket()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                        <div>
+                            <h4 class="fw-bold m-0"><i class="bi bi-receipt me-2"></i>Orden Actual</h4>
+                            <div class="badge bg-warning text-dark mt-1" id="mesa-badge-ticket">Sin Mesa</div>
+                        </div>
+                        <div class="text-end">
+                            <div class="fs-5 fw-bold font-monospace" id="orden-id">#----</div>
+                            <div class="small opacity-75"><i class="bi bi-clock"></i> <span id="reloj">00:00</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ticket-body" id="lista-carrito">
+                    <div class="d-flex flex-column justify-content-center align-items-center h-100 text-muted opacity-50">
+                        <i class="bi bi-basket2 display-1 mb-3"></i>
+                        <h5>Orden Vacía</h5>
+                        <p>Selecciona productos del menú</p>
+                    </div>
+                </div>
+
+                <div class="ticket-footer">
+                    
+                    <div class="form-check form-switch mb-3 p-2 bg-light rounded d-flex justify-content-between align-items-center px-3">
+                        <label class="form-check-label fw-bold text-danger mb-0" for="checkUrgente">
+                            <i class="bi bi-fire me-1"></i> Prioridad Urgente
+                        </label>
+                        <input class="form-check-input" type="checkbox" role="switch" id="checkUrgente" style="width: 3rem; height: 1.5rem;">
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-chat-left-text"></i></span>
+                        <input type="text" id="nota-general" class="form-control bg-light border-start-0" placeholder="Nota general para cocina...">
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-1 text-secondary">
+                        <span>Subtotal:</span>
+                        <span id="lbl-subtotal" class="fw-bold text-dark">$0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 text-secondary">
+                        <span>IVA (15%):</span>
+                        <span id="lbl-iva" class="fw-bold text-dark">$0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center border-top pt-3 mb-3">
+                        <span class="h4 fw-bold text-dark m-0">Total</span>
+                        <span class="h3 fw-bold text-primary m-0" id="lbl-total">$0.00</span>
+                    </div>
+
+                    <button class="btn btn-lg w-100 fw-bold text-white shadow-sm" style="background: var(--brand-orange);" onclick="enviarPedidoBackend()">
+                        <i class="bi bi-send-check-fill me-2"></i> CONFIRMAR PEDIDO
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let mesaActualId = null;
+    let carrito = [];
+    const IVA_RATE = 0.15; // 15% IVA
+
+    // Reloj
+    setInterval(() => {
+        document.getElementById('reloj').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }, 1000);
+
+    function generarOrdenID() { return "#" + Math.floor(1000 + Math.random() * 9000); }
+
+    function abrirMesa(id, numero) {
+        mesaActualId = id;
+        document.getElementById('orden-id').innerText = generarOrdenID();
+        document.getElementById('mesa-badge-ticket').innerText = "Mesa " + numero;
+        document.getElementById('titulo-seccion').innerHTML = '<i class="bi bi-bag-plus-fill text-warning me-2"></i>Tomando Pedido: Mesa ' + numero;
+        
+        document.getElementById('vista-mesas').classList.add('d-none');
+        document.getElementById('vista-menu').classList.remove('d-none');
+        
+        carrito = [];
+        renderizarCarrito();
+    }
+
+    function volverAMesas() {
+        document.getElementById('vista-menu').classList.add('d-none');
+        document.getElementById('vista-mesas').classList.remove('d-none');
+        document.getElementById('mesa-badge-ticket').innerText = "Sin Mesa";
+        document.getElementById('titulo-seccion').innerHTML = '<i class="bi bi-grid-fill text-warning me-2"></i>Selecciona una Mesa';
+        
+        // Resetear
+        document.getElementById('lista-carrito').innerHTML = `
+            <div class="d-flex flex-column justify-content-center align-items-center h-100 text-muted opacity-50">
+                <i class="bi bi-basket2 display-1 mb-3"></i>
+                <h5>Orden Vacía</h5>
+            </div>`;
+        resetTotales();
+        location.reload(); 
+    }
+
+    // --- Filtros ---
+    function filtrarCat(clase, btn) {
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.producto-item').forEach(el => {
+            el.style.display = (clase === 'todas' || el.classList.contains(clase)) ? 'block' : 'none';
+        });
+    }
+
+    function filtrarProductos() {
+        const texto = document.getElementById('buscador').value.toLowerCase();
+        document.querySelectorAll('.producto-item').forEach(el => {
+            el.style.display = el.getAttribute('data-name').includes(texto) ? 'block' : 'none';
+        });
+    }
+
+    // --- Carrito ---
+    function agregarAlCarrito(id, nombre, precio) {
+        let p = parseFloat(precio);
+        let item = carrito.find(i => i.id === id);
+        if(item) item.cantidad++;
+        else carrito.push({id, nombre, precio: p, cantidad: 1, nota: ''});
+        renderizarCarrito();
+    }
+
+    function quitarItem(index) {
+        carrito.splice(index, 1);
+        renderizarCarrito();
+    }
+
+  function renderizarCarrito() {
+        const div = document.getElementById('lista-carrito');
+        
+        // Si está vacío
+        if (carrito.length === 0) {
+            div.innerHTML = `
+                <div class="d-flex flex-column justify-content-center align-items-center h-100 text-muted opacity-50">
+                    <i class="bi bi-basket2 display-1 mb-3"></i>
+                    <h4>Orden Vacía</h4>
+                    <p class="fs-5">Agrega productos</p>
+                </div>`;
+            resetTotales();
+            return;
+        }
+
+        div.innerHTML = '';
+        let subtotal = 0;
+
+        carrito.forEach((item, index) => {
+            let totalItem = item.precio * item.cantidad;
+            subtotal += totalItem;
+
+            div.innerHTML += `
+                <div class="ticket-item ticket-item-large"> <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="item-name-big">
+                            <span class="text-primary me-1">${item.cantidad}x</span> ${item.nombre}
+                        </div>
+                        <div class="item-price-big">$${totalItem.toFixed(2)}</div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <span class="input-group-text bg-white text-muted"><i class="bi bi-pencil-fill"></i></span>
+                        
+                        <input type="text" class="form-control input-nota-big border-start-0 ps-0 text-dark" 
+                               placeholder="Nota (ej. Sin cebolla)..." value="${item.nota}" 
+                               onchange="carrito[${index}].nota = this.value">
+                        
+                        <button class="btn btn-outline-danger border-start-0 btn-trash-big" onclick="quitarItem(${index})">
+                            <i class="bi bi-trash3-fill"></i>
+                        </button>
+                    </div>
+
+                </div>
+            `;
+        });
+        calcularTotales(subtotal);
+    }
+
+    function calcularTotales(subtotal) {
+        let iva = subtotal * IVA_RATE;
+        let total = subtotal + iva;
+        document.getElementById('lbl-subtotal').innerText = `$${subtotal.toFixed(2)}`;
+        document.getElementById('lbl-iva').innerText = `$${iva.toFixed(2)}`;
+        document.getElementById('lbl-total').innerText = `$${total.toFixed(2)}`;
+    }
+
+    function resetTotales() {
+        document.getElementById('lbl-subtotal').innerText = "$0.00";
+        document.getElementById('lbl-iva').innerText = "$0.00";
+        document.getElementById('lbl-total').innerText = "$0.00";
+    }
+
+    function enviarPedidoBackend() {
+        if(carrito.length === 0) return alert("El pedido está vacío.");
+        
+        fetch('/api/crear_pedido/', {
+            method: 'POST',
+            body: JSON.stringify({
+                mesa_id: mesaActualId,
+                items: carrito,
+                notas: document.getElementById('nota-general').value,
+                urgente: document.getElementById('checkUrgente').checked
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'ok') {
+                alert("✅ Pedido enviado a cocina");
+                volverAMesas();
+            } else { alert("Error: " + data.msg); }
+        });
+    }
+    // --- FUNCIÓN PARA MOSTRAR/OCULTAR TICKET ---
+    function toggleTicket() {
+        const menu = document.getElementById('columna-menu');
+        const ticket = document.getElementById('columna-ticket');
+        const btnAbrir = document.getElementById('btn-abrir-ticket');
+
+        if (ticket.classList.contains('d-none')) {
+            // MOSTRAR TICKET
+            ticket.classList.remove('d-none');     // Aparece el ticket
+            menu.classList.remove('col-lg-12');    // El menú deja de ser ancho completo
+            menu.classList.add('col-lg-7');        // El menú vuelve al 60%
+            btnAbrir.classList.add('d-none');      // Ocultamos el botón de abrir
+        } else {
+            // OCULTAR TICKET (Cerrar)
+            ticket.classList.add('d-none');        // Desaparece el ticket
+            menu.classList.remove('col-lg-7');     // Quitamos el ancho del 60%
+            menu.classList.add('col-lg-12');       // El menú ocupa el 100%
+            btnAbrir.classList.remove('d-none');   // Mostramos el botón para volver a abrir
+        }
+    }
+</script>
+{% endblock %}

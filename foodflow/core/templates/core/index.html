@@ -1,0 +1,116 @@
+{% extends "comun/esquema.html" %}
+
+{% block content %}
+
+<div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 900px; margin: 20px auto; padding: 20px; background-color: #f4f7f6; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    
+    <h2 style="text-align: center; color: #2c3e50; margin-bottom: 30px;">Panel de Denuncias Ciudadanas</h2>
+    
+    <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+        
+        <div style="flex: 1; min-width: 250px; background-color: #ffffff; padding: 25px; border-radius: 10px; border-top: 5px solid #e74c3c; text-align: center; transition: transform 0.3s;">
+            <div style="font-size: 40px; margin-bottom: 15px;">🚨</div>
+            <h3 style="color: #c0392b; margin-top: 0;">Seguridad</h3>
+            <p style="color: #7f8c8d; font-size: 14px; line-height: 1.6;">Reporta actos delictivos, disturbios o presencia de personas sospechosas en tu zona.</p>
+            <button style="background-color: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px;">Denunciar</button>
+        </div>
+
+        <div style="flex: 1; min-width: 250px; background-color: #ffffff; padding: 25px; border-radius: 10px; border-top: 5px solid #f39c12; text-align: center;">
+            <div style="font-size: 40px; margin-bottom: 15px;">🚧</div>
+            <h3 style="color: #d35400; margin-top: 0;">Infraestructura</h3>
+            <p style="color: #7f8c8d; font-size: 14px; line-height: 1.6;">Informa sobre baches, luminarias fundidas, semáforos dañados o fugas de agua.</p>
+            <button style="background-color: #f39c12; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px;">Reportar</button>
+        </div>
+
+        <div style="flex: 1; min-width: 250px; background-color: #ffffff; padding: 25px; border-radius: 10px; border-top: 5px solid #27ae60; text-align: center;">
+            <div style="font-size: 40px; margin-bottom: 15px;">🌱</div>
+            <h3 style="color: #1e8449; margin-top: 0;">Medio Ambiente</h3>
+            <p style="color: #7f8c8d; font-size: 14px; line-height: 1.6;">Denuncia acumulación de basura en lugares prohibidos, maltrato animal o tala ilegal.</p>
+            <button style="background-color: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px;">Enviar Alerta</button>
+        </div>
+
+    </div>
+</div>
+
+<div>
+    <svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    /* Estilos embebidos */
+    .person {
+      fill: #3498db; /* Azul */
+      transform-origin: center bottom;
+      animation: report 3s infinite alternate;
+    }
+    .problem {
+      fill: #e74c3c; /* Rojo */
+      transform-origin: center;
+      animation: pulse 3s infinite alternate;
+    }
+    .cloud {
+      fill: #f39c12; /* Naranja */
+      transform-origin: center;
+      animation: register 3s infinite alternate;
+    }
+    .solution {
+      fill: #27ae60; /* Verde */
+      transform-origin: center;
+      animation: solve 3s infinite alternate;
+    }
+    .arrow {
+      fill: none;
+      stroke: #7f8c8d;
+      stroke-width: 3;
+      stroke-dasharray: 10;
+      animation: dash 3s infinite linear;
+    }
+
+    @keyframes report {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes register {
+      0% { transform: translateX(0); opacity: 0; }
+      33% { transform: translateX(20px); opacity: 1; }
+      66% { transform: translateX(40px); opacity: 1; }
+      100% { transform: translateX(60px); opacity: 0; }
+    }
+
+    @keyframes solve {
+      0% { transform: translateY(20px); opacity: 0; }
+      66% { transform: translateY(10px); opacity: 0.5; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes dash {
+      from { stroke-dashoffset: 0; }
+      to { stroke-dashoffset: 20; }
+    }
+
+  </style>
+
+  <circle class="person" cx="50" cy="150" r="20" />
+  <rect class="person" x="40" y="110" width="20" height="40" />
+  <line class="person" x1="50" y1="120" x2="80" y2="100" stroke="#3498db" stroke-width="5" /> <rect class="problem" x="120" y="90" width="30" height="30" rx="5" />
+  <text x="135" y="110" text-anchor="middle" font-size="20" fill="white" class="problem">!</text>
+
+  <path class="arrow" d="M 80 105 L 115 105" />
+  <path class="arrow" d="M 160 105 L 200 105" />
+
+  <circle class="cloud" cx="230" cy="105" r="30" />
+  <text x="230" y="110" text-anchor="middle" font-size="20" fill="white" class="cloud">📝</text>
+
+  <path class="arrow" d="M 260 105 L 300 105" />
+
+  <rect class="solution" x="330" y="90" width="30" height="30" rx="5" />
+  <text x="345" y="110" text-anchor="middle" font-size="20" fill="white" class="solution">✔️</text>
+</svg>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "comun/esquema.html" %}
+
+{% block content %}
+
+<div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 30px auto; padding: 30px; background-color: #ffffff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e0e0e0;">
+
+    <div style="text-align: center; margin-bottom: 30px;">
+        <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" style="display: block; margin: 0 auto 15px;">
+            <style>
+                @keyframes bounceEnvelope {
+                    0% { transform: translateY(0); }
+                    50% { transform: translateY(-10px); }
+                    100% { transform: translateY(0); }
+                }
+                .envelope-body { fill: #333333; animation: bounceEnvelope 2s infinite ease-in-out; transform-origin: center center; }
+                .envelope-flap { fill: #555555; }
+                .envelope-letter { fill: #f0f0f0; }
+            </style>
+            <rect x="10" y="25" width="60" height="40" rx="5" class="envelope-body"/>
+            <polygon points="10 25, 40 45, 70 25" class="envelope-flap"/>
+            <rect x="20" y="35" width="40" height="20" rx="2" class="envelope-letter"/>
+        </svg>
+        <h2 style="color: #333333; margin-bottom: 5px;">Contáctanos sobre el Proyecto</h2>
+        <p style="color: #666666; font-size: 0.95em;">¿Tienes preguntas, sugerencias o quieres colaborar? Escríbenos.</p>
+    </div>
+
+    <form style="display: flex; flex-direction: column; gap: 15px;">
+        <div style="margin-bottom: 10px;">
+            <label for="nombre" style="display: block; margin-bottom: 8px; color: #333333; font-weight: bold; font-size: 0.9em;">Nombre Completo:</label>
+            <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" style="width: calc(100% - 20px); padding: 10px; border: 1px solid #cccccc; border-radius: 5px; font-size: 0.9em; box-sizing: border-box; background-color: #f9f9f9; color: #333333;">
+        </div>
+
+        <div style="margin-bottom: 10px;">
+            <label for="email" style="display: block; margin-bottom: 8px; color: #333333; font-weight: bold; font-size: 0.9em;">Correo Electrónico:</label>
+            <input type="email" id="email" name="email" placeholder="tu.correo@ejemplo.com" style="width: calc(100% - 20px); padding: 10px; border: 1px solid #cccccc; border-radius: 5px; font-size: 0.9em; box-sizing: border-box; background-color: #f9f9f9; color: #333333;">
+        </div>
+
+        <div style="margin-bottom: 10px;">
+            <label for="asunto" style="display: block; margin-bottom: 8px; color: #333333; font-weight: bold; font-size: 0.9em;">Asunto:</label>
+            <input type="text" id="asunto" name="asunto" placeholder="Pregunta sobre la plataforma" style="width: calc(100% - 20px); padding: 10px; border: 1px solid #cccccc; border-radius: 5px; font-size: 0.9em; box-sizing: border-box; background-color: #f9f9f9; color: #333333;">
+        </div>
+
+        <div style="margin-bottom: 10px;">
+            <label for="mensaje" style="display: block; margin-bottom: 8px; color: #333333; font-weight: bold; font-size: 0.9em;">Tu Mensaje:</label>
+            <textarea id="mensaje" name="mensaje" rows="6" placeholder="Describe tu consulta o sugerencia aquí..." style="width: calc(100% - 20px); padding: 10px; border: 1px solid #cccccc; border-radius: 5px; font-size: 0.9em; box-sizing: border-box; background-color: #f9f9f9; color: #333333; resize: vertical;"></textarea>
+        </div>
+
+        <button type="submit" style="background-color: #333333; color: #ffffff; padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; font-weight: bold; transition: background-color 0.3s ease;">Enviar Mensaje</button>
+    </form>
+
+    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
+        <p style="color: #666666; font-size: 0.85em;">También puedes contactarnos directamente en: <a href="mailto:info@denunciasciudadanas.org" style="color: #555555; text-decoration: none; font-weight: bold;">info@denunciasciudadanas.org</a></p>
+    </div>
+</div>
+
+
+{% endblock %}
+
