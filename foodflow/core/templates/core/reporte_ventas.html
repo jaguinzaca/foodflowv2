@@ -1,0 +1,65 @@
+{% extends 'comun/esquema.html' %}
+
+{% block title %}Reporte de Ventas{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark"><i class="fas fa-chart-line me-2 text-warning"></i>Reporte Diario</h2>
+        <span class="badge bg-secondary fs-6">{{ fecha|date:"d M, Y" }}</span>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-success text-white shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 opacity-75">Ventas Totales de Hoy</h6>
+                    <h1 class="card-title fw-bold display-5">${{ total_dia|floatformat:2 }}</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0 fs-6">Desglose de Transacciones</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover table-striped mb-0">
+               <thead>
+                    <tr>
+                        <th scope="col" class="ps-4"># Venta</th>
+                        <th scope="col">Hora</th>
+                        <th scope="col">Atendido Por</th> <th scope="col">Pedido Asociado</th>
+                        <th scope="col" class="text-end pe-4">Monto</th>
+                    </tr>
+                </thead>
+                <tbody>
+    {% for venta in ventas %}
+    <tr>
+        <td class="ps-4 fw-bold text-muted">{{ forloop.counter }}</td>
+        <td>{{ venta.fecha_venta|date:"H:i A" }}</td>
+        
+        <td>
+            <span class="badge bg-info text-dark">
+                <i class="fas fa-user"></i> 
+                {{ venta.pedido.usuario.username|default:"Sistema"|title }}
+            </span>
+        </td>
+
+        <td>
+            <span class="badge bg-primary">Orden #{{ venta.pedido.id }}</span>
+            <span class="badge bg-light text-dark border ms-2">
+                {{ venta.metodo_pago|upper }}
+            </span>
+        </td>
+        <td class="text-end pe-4 fw-bold text-success">${{ venta.total|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
+</tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

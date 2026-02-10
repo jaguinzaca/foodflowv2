@@ -38,4 +38,46 @@
         color: white;
         transform: translateY(-1px);
     }
+
+    /* --- ESTILOS MÉTODOS DE PAGO --- */
+    .payment-options-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr; /* 3 columnas iguales */
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    /* Ocultamos el radio button real */
+    .payment-radio { display: none; }
+
+    /* Estilo del botón (Label) */
+    .payment-label {
+        border: 1px solid #e5e7eb;
+        background: #f9fafb;
+        border-radius: 12px;
+        padding: 10px 5px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: #6b7280;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .payment-label i { font-size: 1.2rem; }
+
+    /* Efecto Hover */
+    .payment-label:hover { background: #f3f4f6; border-color: #d1d5db; }
+
+    /* ESTADO SELECCIONADO (Cuando el radio está checked) */
+    .payment-radio:checked + .payment-label {
+        background: #fff7ed; /* Fondo naranja muy claro */
+        border-color: var(--brand-orange);
+        color: var(--brand-orange);
+        box-shadow: 0 2px 4px rgba(249, 115, 22, 0.1);
+    }
 </style>

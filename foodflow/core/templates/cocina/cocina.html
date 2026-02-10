@@ -5,7 +5,7 @@
 <style>
     /* --- ESTILOS KDS (Dark Mode) --- */
     body {
-        background-color: #111827; /* Fondo oscuro igual que el header */
+        background-color: #111827;
         color: #f3f4f6;
     }
     
@@ -17,7 +17,7 @@
 
     /* Tarjeta de Pedido Base */
     .ticket-card {
-        background-color: #1f2937; /* Gris oscuro para las tarjetas */
+        background-color: #1f2937;
         border: 1px solid #374151;
         border-radius: 16px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
@@ -35,7 +35,7 @@
         padding: 1rem;
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: start; /* Alineado arriba */
         border-bottom: 1px solid #4b5563;
     }
 
@@ -43,14 +43,26 @@
         font-size: 1.5rem;
         font-weight: 800;
         color: white;
+        line-height: 1;
+    }
+    
+    .order-id-badge {
+        font-size: 0.85rem;
+        color: #9ca3af;
+        font-family: monospace;
+        background: rgba(0,0,0,0.3);
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-bottom: 4px;
+        display: inline-block;
     }
 
     .timer-badge {
         background: #111827;
-        color: #fbbf24; /* Amarillo reloj */
+        color: #fbbf24;
         padding: 5px 12px;
         border-radius: 8px;
-        font-family: 'Courier New', monospace; /* Fuente tipo reloj digital */
+        font-family: 'Courier New', monospace;
         font-weight: bold;
         font-size: 1.1rem;
         border: 1px solid #4b5563;
@@ -85,8 +97,8 @@
     }
     .item-note {
         display: block;
-        background-color: rgba(249, 115, 22, 0.15); /* Fondo naranja suave */
-        color: #fdba74; /* Texto naranja claro */
+        background-color: rgba(249, 115, 22, 0.15);
+        color: #fdba74;
         font-size: 0.85rem;
         padding: 4px 8px;
         border-radius: 6px;
@@ -94,29 +106,32 @@
         border-left: 3px solid var(--brand-orange);
     }
 
-    /* Notas Generales */
+    /* Notas Generales (Mesero a Cocina) */
     .general-note {
-        background-color: #3730a3; /* Azul oscuro */
-        color: #c7d2fe;
-        padding: 10px;
+        background-color: #4338ca; /* Azul índigo más visible */
+        color: #e0e7ff;
+        padding: 12px;
         border-radius: 8px;
-        font-size: 0.9rem;
-        margin-top: 10px;
+        font-size: 0.95rem;
+        margin-top: 15px;
         display: flex;
-        align-items: center;
-        gap: 8px;
+        align-items: start;
+        gap: 10px;
+        border: 1px solid #6366f1;
     }
 
-    /* Footer y Botón */
+    /* Footer y Botones */
     .ticket-footer {
         padding: 1rem;
         background-color: #1f2937;
         border-top: 1px solid #374151;
+        display: flex;
+        gap: 10px; /* Espacio entre botones */
     }
     
     .btn-ready {
-        width: 100%;
-        background-color: #10b981; /* Verde éxito */
+        flex-grow: 1; /* Ocupa el espacio restante */
+        background-color: #10b981;
         color: white;
         font-weight: 800;
         padding: 12px;
@@ -131,16 +146,32 @@
         box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
     }
 
+    /* Botón de Problema (Nuevo) */
+    .btn-problem {
+        width: 50px; /* Cuadrado */
+        background-color: #374151; /* Gris oscuro base */
+        color: #ef4444; /* Icono rojo */
+        border: 2px solid #ef4444;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        transition: 0.2s;
+    }
+    .btn-problem:hover {
+        background-color: #ef4444;
+        color: white;
+    }
+
     /* --- ESTADOS PRIORITARIOS --- */
-    
-    /* Estado: URGENTE (Rojo) */
     .is-urgent {
         border: 2px solid #ef4444;
         box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
         animation: pulse-red 2s infinite;
     }
     .is-urgent .ticket-header {
-        background-color: #7f1d1d; /* Rojo oscuro header */
+        background-color: #7f1d1d;
     }
     .is-urgent .timer-badge {
         color: #ef4444;
@@ -153,16 +184,12 @@
         100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
     }
 
-    /* Estado: PEDIDO ANTIGUO (Parpadeo Suave) */
-    .is-old {
-        border: 1px solid #eab308; /* Amarillo */
-    }
+    .is-old { border: 1px solid #eab308; }
     .is-old .timer-badge {
         animation: blink 1s infinite;
         background-color: #422006;
         color: #facc15;
     }
-    
     @keyframes blink { 50% { opacity: 0.5; } }
 
 </style>
@@ -194,8 +221,11 @@
                 
                 <div class="ticket-header">
                     <div>
-                        <span class="text-secondary small fw-bold d-block text-uppercase">Mesa</span>
-                        <span class="table-number">{{ pedido.mesa.numero }}</span>
+                        <span class="order-id-badge">#{{ pedido.id }}</span>
+                        <div class="d-flex align-items-baseline gap-2">
+                            <span class="text-secondary small fw-bold text-uppercase">Mesa</span>
+                            <span class="table-number">{{ pedido.mesa.numero }}</span>
+                        </div>
                     </div>
                     <div class="text-end">
                         <div class="timer-badge" id="timer-{{ pedido.id }}">00:00</div>
@@ -220,17 +250,24 @@
                     </div>
                     {% endfor %}
 
-                    {% if pedido.nota_general %}
+                    {% if pedido.nota or pedido.nota_general %}
                     <div class="general-note">
-                        <i class="bi bi-exclamation-circle-fill text-warning fs-5"></i>
-                        <span>{{ pedido.nota_general }}</span>
+                        <i class="bi bi-chat-quote-fill fs-4"></i>
+                        <div>
+                            <strong class="d-block small text-uppercase opacity-75">Nota Mesero:</strong>
+                            <span>{{ pedido.nota|default:pedido.nota_general }}</span>
+                        </div>
                     </div>
                     {% endif %}
                 </div>
 
                 <div class="ticket-footer mt-auto">
+                    <button class="btn-problem" onclick="reportarProblema('{{ pedido.id }}')" title="Reportar Problema">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </button>
+                    
                     <button class="btn-ready shadow" onclick="marcarListo('{{ pedido.id }}')">
-                        <i class="bi bi-check-lg me-2"></i> Pedido Listo
+                        <i class="bi bi-check-lg me-2"></i> LISTO
                     </button>
                 </div>
             </div>
@@ -253,7 +290,7 @@
         document.getElementById('clock-main').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
     }, 1000);
 
-    // --- 2. TEMPORIZADORES DE PEDIDOS (Contador de tiempo transcurrido) ---
+    // --- 2. TEMPORIZADORES ---
     function updateTimers() {
         const cards = document.querySelectorAll('.ticket-card');
         const now = new Date();
@@ -264,37 +301,30 @@
             const diffMs = now - created;
             const diffMins = Math.floor(diffMs / 60000);
             
-            // Calcular MM:SS
             const minutes = Math.floor(diffMs / 60000);
             const seconds = Math.floor((diffMs % 60000) / 1000);
             const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             
-            // Actualizar texto
             const timerBadge = card.querySelector('.timer-badge');
             timerBadge.innerText = timeString;
 
-            // LÓGICA DE PEDIDO ANTIGUO (> 15 minutos)
-            // Si no es urgente pero lleva mucho tiempo, se marca como "Old" (amarillo parpadeante)
             if (diffMins >= 15 && !card.classList.contains('is-urgent')) {
                 card.classList.add('is-old');
             }
         });
     }
 
-    // Actualizar timers cada segundo
     setInterval(updateTimers, 1000);
-    updateTimers(); // Ejecutar inmediatamente al cargar
+    updateTimers();
 
-    // --- 3. MARCAR LISTO (API) ---
+    // --- 3. MARCAR LISTO ---
     function marcarListo(id) {
-        if(!confirm("¿Confirmar que el pedido está completo?")) return;
+        if(!confirm("¿Pedido completo y listo para servir?")) return;
         
-        // Animación de salida
         const card = document.getElementById(`card-${id}`);
         card.style.transform = "scale(0.9)";
         card.style.opacity = "0";
 
-        // Llamada al Backend
         fetch(`/api/pedido/${id}/listo/`, { method: 'POST' })
         .then(res => res.json())
         .then(data => {
@@ -309,7 +339,34 @@
         });
     }
 
-    // Recarga automática de seguridad cada 60s para asegurar sincronización
+    // --- 4. REPORTAR PROBLEMA (NUEVA FUNCIÓN) ---
+    function reportarProblema(id) {
+        const motivo = prompt("⚠️ ¿Cuál es el problema con este pedido?\n(Ej: Falta ingrediente, Plato demorado...)");
+        
+        if (!motivo) return; // Si cancela, no hace nada
+
+        // Enviaremos el problema al backend
+        // Asegúrate de tener una URL en urls.py como: path('api/pedido/<int:pk>/problema/', views.reportar_problema)
+        fetch(`/api/pedido/${id}/problema/`, { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ motivo: motivo })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'ok') {
+                alert("Reporte enviado a caja/meseros.");
+                // Opcional: Cambiar visualmente la tarjeta para indicar que tiene problema
+                const card = document.getElementById(`card-${id}`);
+                card.style.border = "2px dashed #f59e0b"; // Borde amarillo discontinuo
+            } else {
+                alert("Error al enviar reporte.");
+            }
+        })
+        .catch(err => alert("Error de conexión al reportar problema."));
+    }
+
+    // Recarga automática
     setTimeout(() => location.reload(), 60000);
 
 </script>

@@ -2,6 +2,8 @@
 {% block title %}Mesero - FoodFlow{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
 <style>
     /* --- ESTILOS MESERO POS (ACTUALIZADOS) --- */
     
@@ -10,6 +12,8 @@
         background-color: #f3f4f6;
         padding-right: 15px;
         border-right: 1px solid #e5e7eb;
+        height: calc(100vh - 70px);
+        overflow-y: auto;
     }
 
     /* Buscador */
@@ -80,15 +84,16 @@
         box-shadow: 0 2px 5px rgba(249, 115, 22, 0.3);
     }
 
-    /* --- SIDEBAR DERECHO (TICKET MÁS ANCHO) --- */
+    /* --- SIDEBAR DERECHO (TICKET) --- */
     .ticket-sidebar {
         background: white;
-        height: calc(100vh - 70px); /* Altura total menos header */
+        height: calc(100vh - 70px); 
         position: sticky;
         top: 70px;
         display: flex;
         flex-direction: column;
         z-index: 100;
+        border-left: 1px solid #e5e7eb;
     }
 
     .ticket-header {
@@ -101,46 +106,79 @@
     .ticket-body {
         flex: 1;
         overflow-y: auto;
-        padding: 1.5rem; /* Más padding interno */
+        padding: 1.5rem;
         background: #fff;
     }
 
-    .ticket-item {
-        background: #f8fafc;
-        border-radius: 12px;
+    /* --- ESTILO TARJETA GRANDE --- */
+    .tarjeta-pedido {
+        background: white;
         border: 1px solid #e2e8f0;
-        padding: 1rem;
-        margin-bottom: 0.8rem;
-        animation: slideIn 0.2s;
+        border-left: 5px solid #f97316;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
-    @keyframes slideIn { from {opacity:0; transform:translateX(10px);} to {opacity:1; transform:translateX(0);} }
+    
+    .nombre-producto {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #1f2937;
+        line-height: 1.2;
+    }
+
+    .controles-cantidad {
+        background: #f3f4f6;
+        border-radius: 8px;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-qty {
+        width: 32px; height: 32px;
+        border-radius: 6px;
+        border: none;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        font-size: 1.2rem;
+    }
+    .btn-menos { background: #fee2e2; color: #ef4444; }
+    .btn-mas { background: #dcfce7; color: #16a34a; }
 
     .ticket-footer {
         background: #fff;
         padding: 1.5rem;
         border-top: 1px solid #e5e7eb;
-        box-shadow: 0 -4px 20px rgba(0,0,0,0.05); /* Sombra hacia arriba */
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
     }
 
     /* Selector de Mesas */
     .mesa-selector { 
-        min-height: 120px; 
+        min-height: 180px; 
         border-radius: 16px; 
         cursor: pointer; 
         transition: 0.2s; 
         border: 2px solid transparent;
         position: relative;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
     .mesa-selector:hover { transform: translateY(-3px); box-shadow: 0 10px 15px rgba(0,0,0,0.1) !important; }
     
     /* Estados Visuales Mesas */
-    .mesa-libre { background: #ecfdf5; color: #047857; border-color: #10b981; }
-    .mesa-ocupada { background: #f3f4f6; color: #4b5563; border-color: #9ca3af; opacity: 0.8; }
-    .mesa-esperando { background: #fff7ed; color: #c2410c; border-color: #f97316; }
-    .mesa-lista { background: #eff6ff; color: #1d4ed8; border-color: #3b82f6; animation: pulse 2s infinite; }
+    .mesa-libre { background: #d1fae5; color: #065f46; border: 2px solid #10b981; }
+    .mesa-esperando { background: #ffedd5; color: #9a3412; border: 2px solid #f97316; }
+    .mesa-ocupada { background: #fee2e2; color: #991b1b; border: 2px solid #ef4444; }
+    .mesa-lista { background: #dbeafe; color: #1e40af; border: 2px solid #3b82f6; }
+    .mesa-reservada { background: #f3f4f6; color: #4b5563; border: 2px solid #9ca3af; border-style: dashed; opacity: 0.7; }
 
-    /* Badge del Mesero (Nuevo) */
+    /* Badge del Mesero */
     .waiter-badge {
         background: white;
         padding: 8px 16px;
@@ -153,45 +191,74 @@
         align-items: center;
         gap: 8px;
     }
+    
+    /* Colores barra inferior mesa */
+    .barra-libre { background-color: #10b981; }
+    .barra-esperando { background-color: #f97316; }
+    .barra-lista { background-color: #3b82f6; }
+    .barra-ocupada { background-color: #ef4444; }
+    .barra-reservada { background-color: #9ca3af; }
+    .barra-default { background-color: #9ca3af; }
 
-    /* --- AJUSTES PARA TICKET GRANDE (BIG MODE) --- */
-    .ticket-item-large {
-        padding: 2.5rem !important; /* Más espacio interno */
-        border: 1px solid #cbd5e1;
+    /* --- ESTILOS DE PAGOS (ARREGLADOS) --- */
+    .payment-options-container {
+        display: flex;
+        gap: 10px; /* Espacio entre botones */
+        margin-bottom: 15px;
     }
-    .item-name-big {
-        font-size: 1.3rem; /* Nombre del plato GRANDE */
-        font-weight: 800;
-        color: #1e293b;
+    
+    .payment-radio { 
+        display: none; /* Ocultar el círculo del radio */ 
+    } 
+    
+    .payment-label {
+        flex: 1; /* Que todos ocupen el mismo ancho */
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        padding: 10px 5px;
+        text-align: center;
+        cursor: pointer;
+        background: white;
+        transition: all 0.2s;
+        display: flex;
+        flex-direction: column; /* Icono arriba, texto abajo */
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        color: #4b5563;
     }
-    .item-price-big {
-        font-size: 1.2rem;
-        font-weight: 700;
+    
+    .payment-label i {
+        font-size: 1.4rem;
+        margin-bottom: 5px;
         color: var(--brand-orange);
     }
-    .input-nota-big {
-        font-size: 1rem !important; /* Texto de la nota más legible */
-        padding: 10px !important;
+    
+    /* Cuando se selecciona una opción */
+    .payment-radio:checked + .payment-label {
+        border-color: var(--brand-orange);
+        background-color: #fff7ed; /* Naranja muy suave */
+        color: #c2410c; /* Naranja oscuro */
+        font-weight: 700;
+        box-shadow: 0 2px 5px rgba(249, 115, 22, 0.2);
+        transform: translateY(-2px);
     }
-    .btn-trash-big {
-        width: 50px; /* Botón de borrar más ancho para dedos grandes */
-        font-size: 1.2rem;
-    }
+
 </style>
 
 <div class="container-fluid p-0">
     <div class="row g-0">
         
-       <div id="columna-menu" class="col-lg-7 menu-section p-4 h-100 overflow-auto transition-all"> <div class="d-flex justify-content-between align-items-center mb-4">
-        <div class="d-flex align-items-center gap-3">
-            <h3 class="fw-bold text-dark m-0" id="titulo-seccion">
-                <i class="bi bi-grid-fill text-warning me-2"></i>Selecciona una Mesa
-            </h3>
-            <button id="btn-abrir-ticket" class="btn btn-dark btn-sm rounded-pill px-3 d-none fade-in" onclick="toggleTicket()">
-                <i class="bi bi-receipt me-1"></i> Ver Orden
-            </button>
-        </div>
-                
+       <div id="columna-menu" class="col-lg-7 menu-section p-4 h-100 overflow-auto transition-all"> 
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center gap-3">
+                    <h3 class="fw-bold text-dark m-0" id="titulo-seccion">
+                        <i class="bi bi-grid-fill text-warning me-2"></i>Selecciona una Mesa
+                    </h3>
+                    <button id="btn-abrir-ticket" class="btn btn-dark btn-sm rounded-pill px-3 d-none fade-in" onclick="toggleTicket()">
+                        <i class="bi bi-receipt me-1"></i> Ver Orden
+                    </button>
+                </div>
                 
                 <div class="waiter-badge">
                     <div class="rounded-circle bg-warning text-dark d-flex justify-content-center align-items-center fw-bold" style="width: 28px; height: 28px;">
@@ -204,32 +271,50 @@
             <div id="vista-mesas" class="fade-in">
                 <div class="row g-3">
                     {% for mesa in mesas %}
-                    <div class="col-6 col-md-6 col-xl-4"> <div class="card mesa-selector d-flex justify-content-center align-items-center mesa-{{ mesa.estado }} shadow-sm" 
+                    <div class="col-6 col-md-6 col-xl-4">
+                        <div class="card mesa-selector h-100 shadow-sm position-relative overflow-hidden border-0"
+                             style="min-height: 180px; background: {% if mesa.estado == 'lista' %}#eff6ff{% elif mesa.estado == 'ocupada' %}#fef2f2{% else %}white{% endif %};"
                              onclick="abrirMesa('{{ mesa.id }}', '{{ mesa.numero }}')">
                             
-                            <i class="bi bi-person-workspace position-absolute" style="font-size: 5rem; opacity: 0.05;"></i>
-                            
-                            <h2 class="fw-bold m-0 z-1">Mesa {{ mesa.numero }}</h2>
-                            
-                            <div class="mt-2 z-1">
-                                <span class="badge rounded-pill text-uppercase border shadow-sm px-3 py-2
-                                    {% if mesa.estado == 'libre' %}bg-success text-white border-success
-                                    {% elif mesa.estado == 'ocupada' %}bg-secondary text-white border-secondary
-                                    {% elif mesa.estado == 'lista' %}bg-primary text-white border-primary
-                                    {% else %}bg-warning text-dark border-warning{% endif %}">
-                                    
+                            <div class="card-body d-flex flex-column justify-content-center align-items-center position-relative z-1 w-100">
+                                
+                                <i class="bi 
+                                    {% if mesa.estado == 'libre' %}bi-check-circle text-success
+                                    {% elif mesa.estado == 'esperando' %}bi-clock-history text-warning
+                                    {% elif mesa.estado == 'lista' %}bi-bell-fill text-primary
+                                    {% elif mesa.estado == 'reservada' %}bi-calendar-check text-secondary
+                                    {% else %}bi-people-fill text-danger{% endif %}" 
+                                    style="font-size: 5rem; opacity: 0.15; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                                </i>
+                                
+                                <h2 class="fw-bold m-0 mb-3 display-6 text-dark" style="z-index: 2;">Mesa {{ mesa.numero }}</h2>
+                                
+                                <div style="z-index: 3; width: 100%; text-align: center;">
                                     {% if mesa.estado == 'lista' %}
-                                        <i class="bi bi-bell-fill me-1"></i> ¡LISTO!
-                                    {% elif mesa.estado == 'libre' %}
-                                        <i class="bi bi-check-circle me-1"></i> DISPONIBLE
-                                    {% elif mesa.estado == 'ocupada' %}
-                                        <i class="bi bi-slash-circle me-1"></i> OCUPADA
+                                        <a href="{% url 'procesar_pago' mesa.id %}" 
+                                           class="btn btn-primary fw-bold shadow px-4 py-2 rounded-pill"
+                                           style="border: 2px solid white; white-space: nowrap;"
+                                           onclick="event.stopPropagation(); return confirm('¿Confirmar pago y liberar mesa?');">
+                                           <i class="bi bi-check2-all me-2"></i>LIBERAR MESA
+                                        </a>
                                     {% else %}
-                                        <i class="bi bi-clock me-1"></i> ESPERANDO
+                                        <span class="badge rounded-pill text-uppercase border shadow-sm px-3 py-2
+                                            {% if mesa.estado == 'libre' %}bg-success text-white border-success
+                                            {% elif mesa.estado == 'esperando' %}bg-warning text-dark border-warning
+                                            {% elif mesa.estado == 'reservada' %}bg-secondary text-white border-secondary
+                                            {% else %}bg-danger text-white border-danger{% endif %}">
+                                            
+                                            {% if mesa.estado == 'libre' %} <i class="bi bi-check2"></i> DISPONIBLE
+                                            {% elif mesa.estado == 'esperando' %} <i class="bi bi-hourglass-split"></i> COCINANDO...
+                                            {% elif mesa.estado == 'reservada' %} <i class="bi bi-lock-fill"></i> RESERVADA
+                                            {% else %} <i class="bi bi-utensils"></i> OCUPADA {% endif %}
+                                        </span>
                                     {% endif %}
-                                </span>
-                            </div>
+                                </div>
 
+                            </div>
+                            
+                            <div class="position-absolute bottom-0 start-0 w-100 barra-{{ mesa.estado|default:'default' }}" style="height: 6px;"></div>
                         </div>
                     </div>
                     {% endfor %}
@@ -267,25 +352,25 @@
                                 
                                 <div class="d-flex justify-content-between align-items-start mb-3">
                                    <div class="overflow-hidden rounded-3 mb-2 d-flex align-items-center justify-content-center bg-light" style="height: 120px; width: 100%;">
-    {% if prod.imagen %}
-        <img src="{{ prod.imagen.url }}" alt="{{ prod.nombre }}" style="width: 100%; height: 100%; object-fit: cover;">
-    {% else %}
-        <i class="bi bi-camera-fill text-secondary fs-1 opacity-25"></i>
-    {% endif %}
-</div>
+                                        {% if prod.imagen %}
+                                            <img src="{{ prod.imagen.url }}" alt="{{ prod.nombre }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                        {% else %}
+                                            <i class="bi bi-camera-fill text-secondary fs-1 opacity-25"></i>
+                                        {% endif %}
+                                    </div>
                                     <div class="add-btn-mini"><i class="bi bi-plus-lg"></i></div>
                                 </div>
                                 
-                          <h6 class="fw-bold text-dark mb-1">{{ prod.nombre }}</h6>
-{% if prod.descripcion %}
-                         <p class="text-muted small m-0 mb-2" style="font-size: 0.8rem; line-height: 1.2;">
-{{ prod.descripcion|truncatechars:45 }}
-    </p>
-{% else %}
-    <div class="mb-2" style="height: 18px;"></div>
-{% endif %}
+                                <h6 class="fw-bold text-dark mb-1">{{ prod.nombre }}</h6>
+                                {% if prod.descripcion %}
+                                <p class="text-muted small m-0 mb-2" style="font-size: 0.8rem; line-height: 1.2;">
+                                    {{ prod.descripcion|truncatechars:45 }}
+                                </p>
+                                {% else %}
+                                    <div class="mb-2" style="height: 18px;"></div>
+                                {% endif %}
 
-<div class="price-tag">${{ prod.precio }}</div>
+                                <div class="price-tag">${{ prod.precio }}</div>
                             </div>
                         </div>
                         {% endfor %}
@@ -294,13 +379,13 @@
             </div>
         </div>
 
-        <div id="columna-ticket" class="col-lg-5 p-0 transition-all"> <div class="ticket-sidebar shadow-lg">
-        
-        <div class="ticket-header">
-            <div class="d-flex justify-content-between align-items-center">
-                <button class="btn btn-sm btn-outline-light border-0 me-2" onclick="toggleTicket()">
-                    <i class="bi bi-x-lg"></i>
-                </button>
+        <div id="columna-ticket" class="col-lg-5 p-0 transition-all"> 
+            <div class="ticket-sidebar shadow-lg">
+                <div class="ticket-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button class="btn btn-sm btn-outline-light border-0 me-2" onclick="toggleTicket()">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
                         <div>
                             <h4 class="fw-bold m-0"><i class="bi bi-receipt me-2"></i>Orden Actual</h4>
                             <div class="badge bg-warning text-dark mt-1" id="mesa-badge-ticket">Sin Mesa</div>
@@ -322,6 +407,20 @@
 
                 <div class="ticket-footer">
                     
+                    <div class="mb-3">
+                        <label class="small text-muted fw-bold mb-1">CLIENTE FRECUENTE:</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-person-vcard"></i></span>
+                            <input type="text" id="cliente-cedula" class="form-control bg-light border-start-0" 
+                                   placeholder="Cédula o RUC (Opcional)" maxlength="13">
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-chat-left-text"></i></span>
+                        <input type="text" id="nota-general" class="form-control bg-light border-start-0" placeholder="Nota para cocina...">
+                    </div>
+
                     <div class="form-check form-switch mb-3 p-2 bg-light rounded d-flex justify-content-between align-items-center px-3">
                         <label class="form-check-label fw-bold text-danger mb-0" for="checkUrgente">
                             <i class="bi bi-fire me-1"></i> Prioridad Urgente
@@ -329,11 +428,34 @@
                         <input class="form-check-input" type="checkbox" role="switch" id="checkUrgente" style="width: 3rem; height: 1.5rem;">
                     </div>
 
-                    <div class="input-group mb-3">
-                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-chat-left-text"></i></span>
-                        <input type="text" id="nota-general" class="form-control bg-light border-start-0" placeholder="Nota general para cocina...">
-                    </div>
+                    <label class="small text-muted fw-bold mb-2 d-block">MÉTODO DE PAGO:</label>
+                    <div class="payment-options-container d-flex gap-2 mb-3">
+                        
+                        <div class="flex-fill">
+                            <input type="radio" class="btn-check" name="metodo_pago" id="pago_efectivo" value="efectivo" checked>
+                            <label class="btn btn-outline-warning w-100" for="pago_efectivo">
+                                <i class="bi bi-cash-coin"></i> Efectivo
+                            </label>
+                        </div>
 
+                        <div class="flex-fill">
+                            <input type="radio" class="btn-check" name="metodo_pago" id="pago_tarjeta" value="tarjeta">
+                            <label class="btn btn-outline-warning w-100" for="pago_tarjeta">
+                                <i class="bi bi-credit-card-2-front"></i> Tarjeta
+                            </label>
+                        </div>
+
+                        <div class="flex-fill">
+                            <input type="radio" class="btn-check" name="metodo_pago" id="pago_transferencia" value="transferencia">
+                            <label class="btn btn-outline-warning w-100" for="pago_transferencia">
+                                <i class="bi bi-qr-code-scan"></i> Transferencia
+                            </label>
+                        </div>
+
+                    </div>
+                    
+                    <hr class="text-muted opacity-25">
+                    
                     <div class="d-flex justify-content-between mb-1 text-secondary">
                         <span>Subtotal:</span>
                         <span id="lbl-subtotal" class="fw-bold text-dark">$0.00</span>
@@ -351,7 +473,6 @@
                         <i class="bi bi-send-check-fill me-2"></i> CONFIRMAR PEDIDO
                     </button>
                 </div>
-
             </div>
         </div>
 
@@ -359,47 +480,79 @@
 </div>
 
 <script>
+    // --- VARIABLES GLOBALES ---
     let mesaActualId = null;
     let carrito = [];
-    const IVA_RATE = 0.15; // 15% IVA
+    const IVA_RATE = 0.15;
+    const NEXT_ORDER_ID = "{{ siguiente_id }}";
 
-    // Reloj
+    // --- RELOJ ---
     setInterval(() => {
-        document.getElementById('reloj').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        const now = new Date();
+        const reloj = document.getElementById('reloj');
+        if(reloj) reloj.innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
     }, 1000);
 
-    function generarOrdenID() { return "#" + Math.floor(1000 + Math.random() * 9000); }
 
+    // --- FUNCIÓN 1: ABRIR MESA ---
     function abrirMesa(id, numero) {
         mesaActualId = id;
-        document.getElementById('orden-id').innerText = generarOrdenID();
-        document.getElementById('mesa-badge-ticket').innerText = "Mesa " + numero;
-        document.getElementById('titulo-seccion').innerHTML = '<i class="bi bi-bag-plus-fill text-warning me-2"></i>Tomando Pedido: Mesa ' + numero;
         
-        document.getElementById('vista-mesas').classList.add('d-none');
-        document.getElementById('vista-menu').classList.remove('d-none');
+        const ordenIdElem = document.getElementById('orden-id');
+        if(ordenIdElem) {
+            ordenIdElem.innerText = "#" + NEXT_ORDER_ID; 
+            ordenIdElem.classList.remove('text-success'); 
+        }
+        
+        const badgeTicket = document.getElementById('mesa-badge-ticket');
+        if(badgeTicket) badgeTicket.innerText = "Mesa " + numero;
+        
+        const titulo = document.getElementById('titulo-seccion');
+        if(titulo) titulo.innerHTML = '<i class="bi bi-bag-plus-fill text-warning me-2"></i>Tomando Pedido: Mesa ' + numero;
+        
+        const vistaMesas = document.getElementById('vista-mesas');
+        const vistaMenu = document.getElementById('vista-menu');
+        
+        if(vistaMesas && vistaMenu) {
+            vistaMesas.classList.add('d-none');
+            vistaMenu.classList.remove('d-none');
+        }
         
         carrito = [];
         renderizarCarrito();
     }
 
+
+    // --- FUNCIÓN 2: VOLVER AL MAPA ---
     function volverAMesas() {
-        document.getElementById('vista-menu').classList.add('d-none');
-        document.getElementById('vista-mesas').classList.remove('d-none');
-        document.getElementById('mesa-badge-ticket').innerText = "Sin Mesa";
-        document.getElementById('titulo-seccion').innerHTML = '<i class="bi bi-grid-fill text-warning me-2"></i>Selecciona una Mesa';
+        const vistaMesas = document.getElementById('vista-mesas');
+        const vistaMenu = document.getElementById('vista-menu');
         
-        // Resetear
-        document.getElementById('lista-carrito').innerHTML = `
-            <div class="d-flex flex-column justify-content-center align-items-center h-100 text-muted opacity-50">
-                <i class="bi bi-basket2 display-1 mb-3"></i>
-                <h5>Orden Vacía</h5>
-            </div>`;
+        if(vistaMesas && vistaMenu) {
+            vistaMenu.classList.add('d-none');
+            vistaMesas.classList.remove('d-none');
+        }
+        
+        const badgeTicket = document.getElementById('mesa-badge-ticket');
+        if(badgeTicket) badgeTicket.innerText = "Sin Mesa";
+        
+        const titulo = document.getElementById('titulo-seccion');
+        if(titulo) titulo.innerHTML = '<i class="bi bi-grid-fill text-warning me-2"></i>Selecciona una Mesa';
+        
+        const listaCarrito = document.getElementById('lista-carrito');
+        if(listaCarrito) {
+            listaCarrito.innerHTML = `
+                <div class="d-flex flex-column justify-content-center align-items-center h-100 text-muted opacity-50">
+                    <i class="bi bi-basket2 display-1 mb-3"></i>
+                    <h5>Orden Vacía</h5>
+                </div>`;
+        }
         resetTotales();
-        location.reload(); 
+        setTimeout(() => location.reload(), 500); 
     }
 
-    // --- Filtros ---
+
+    // --- FUNCIÓN 3: FILTROS DE MENÚ ---
     function filtrarCat(clase, btn) {
         document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
@@ -409,18 +562,26 @@
     }
 
     function filtrarProductos() {
-        const texto = document.getElementById('buscador').value.toLowerCase();
+        const buscador = document.getElementById('buscador');
+        if(!buscador) return;
+        const texto = buscador.value.toLowerCase();
+        
         document.querySelectorAll('.producto-item').forEach(el => {
             el.style.display = el.getAttribute('data-name').includes(texto) ? 'block' : 'none';
         });
     }
 
-    // --- Carrito ---
+
+    // --- FUNCIÓN 4: GESTIÓN DEL CARRITO ---
     function agregarAlCarrito(id, nombre, precio) {
         let p = parseFloat(precio);
         let item = carrito.find(i => i.id === id);
-        if(item) item.cantidad++;
-        else carrito.push({id, nombre, precio: p, cantidad: 1, nota: ''});
+        
+        if(item) {
+            item.cantidad++;
+        } else {
+            carrito.push({id, nombre, precio: p, cantidad: 1, nota: ''});
+        }
         renderizarCarrito();
     }
 
@@ -429,16 +590,29 @@
         renderizarCarrito();
     }
 
-  function renderizarCarrito() {
+    // --- FUNCIÓN NUEVA: Para que funcione el botón de restar (-) ---
+    function restarCantidad(index) {
+        if (carrito[index].cantidad > 1) {
+            carrito[index].cantidad--;
+            renderizarCarrito();
+        } else {
+            if(confirm("¿Eliminar este producto?")) {
+                quitarItem(index);
+            }
+        }
+    }
+
+    // --- FUNCIÓN QUE DIBUJA EL CARRITO (VERSIÓN TARJETA GRANDE) ---
+    function renderizarCarrito() {
         const div = document.getElementById('lista-carrito');
+        if(!div) return;
         
-        // Si está vacío
         if (carrito.length === 0) {
             div.innerHTML = `
                 <div class="d-flex flex-column justify-content-center align-items-center h-100 text-muted opacity-50">
                     <i class="bi bi-basket2 display-1 mb-3"></i>
-                    <h4>Orden Vacía</h4>
-                    <p class="fs-5">Agrega productos</p>
+                    <h5>Orden Vacía</h5>
+                    <p class="small">Selecciona productos del menú</p>
                 </div>`;
             resetTotales();
             return;
@@ -452,21 +626,41 @@
             subtotal += totalItem;
 
             div.innerHTML += `
-                <div class="ticket-item ticket-item-large"> <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div class="item-name-big">
-                            <span class="text-primary me-1">${item.cantidad}x</span> ${item.nombre}
+                <div class="tarjeta-pedido animated-item"> 
+                    
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="nombre-producto" style="width: 70%;">
+                            ${item.nombre}
                         </div>
-                        <div class="item-price-big">$${totalItem.toFixed(2)}</div>
+                        <div class="fw-bold text-dark fs-5">
+                            $${totalItem.toFixed(2)}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted small">Unitario: $${item.precio.toFixed(2)}</span>
+                        
+                        <div class="controles-cantidad border">
+                            <button class="btn-qty btn-menos" onclick="restarCantidad(${index})">
+                                <i class="bi bi-dash"></i>
+                            </button>
+                            
+                            <span class="fw-bold text-dark fs-5 mx-2">${item.cantidad}</span>
+                            
+                            <button class="btn-qty btn-mas" onclick="agregarAlCarrito('${item.id}', '${item.nombre}', '${item.precio}')">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="input-group">
-                        <span class="input-group-text bg-white text-muted"><i class="bi bi-pencil-fill"></i></span>
-                        
-                        <input type="text" class="form-control input-nota-big border-start-0 ps-0 text-dark" 
+                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-pencil-square"></i></span>
+                        <input type="text" class="form-control bg-light border-start-0" 
+                               style="font-size: 0.9rem;"
                                placeholder="Nota (ej. Sin cebolla)..." value="${item.nota}" 
                                onchange="carrito[${index}].nota = this.value">
                         
-                        <button class="btn btn-outline-danger border-start-0 btn-trash-big" onclick="quitarItem(${index})">
+                        <button class="btn btn-outline-danger ms-2 rounded" onclick="quitarItem(${index})" title="Eliminar">
                             <i class="bi bi-trash3-fill"></i>
                         </button>
                     </div>
@@ -480,55 +674,96 @@
     function calcularTotales(subtotal) {
         let iva = subtotal * IVA_RATE;
         let total = subtotal + iva;
-        document.getElementById('lbl-subtotal').innerText = `$${subtotal.toFixed(2)}`;
-        document.getElementById('lbl-iva').innerText = `$${iva.toFixed(2)}`;
-        document.getElementById('lbl-total').innerText = `$${total.toFixed(2)}`;
+        
+        const lblSub = document.getElementById('lbl-subtotal');
+        const lblIva = document.getElementById('lbl-iva');
+        const lblTot = document.getElementById('lbl-total');
+        
+        if(lblSub) lblSub.innerText = `$${subtotal.toFixed(2)}`;
+        if(lblIva) lblIva.innerText = `$${iva.toFixed(2)}`;
+        if(lblTot) lblTot.innerText = `$${total.toFixed(2)}`;
     }
 
     function resetTotales() {
-        document.getElementById('lbl-subtotal').innerText = "$0.00";
-        document.getElementById('lbl-iva').innerText = "$0.00";
-        document.getElementById('lbl-total').innerText = "$0.00";
+        calcularTotales(0);
     }
 
+
+    // --- FUNCIÓN 5: ENVIAR PEDIDO (BACKEND) ---
+   // --- FUNCIÓN 5: ENVIAR PEDIDO (CON CÉDULA) ---
     function enviarPedidoBackend() {
-        if(carrito.length === 0) return alert("El pedido está vacío.");
+        if(carrito.length === 0) return alert("⚠️ El pedido está vacío.");
         
+        const inputPago = document.querySelector('input[name="metodo_pago"]:checked');
+        if (!inputPago) return alert("⚠️ Selecciona un método de pago.");
+        
+        // Obtener datos del formulario
+        const metodoPagoSeleccionado = inputPago.value;
+        const notaElem = document.getElementById('nota-general');
+        const urgenteElem = document.getElementById('checkUrgente');
+        const cedulaElem = document.getElementById('cliente-cedula'); // <--- NUEVO CAMPO
+
+        // Feedback visual en el botón
+        const btn = document.querySelector('button[onclick="enviarPedidoBackend()"]');
+        if(btn) {
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Enviando...';
+            btn.disabled = true;
+        }
+
         fetch('/api/crear_pedido/', {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 mesa_id: mesaActualId,
                 items: carrito,
-                notas: document.getElementById('nota-general').value,
-                urgente: document.getElementById('checkUrgente').checked
+                notas: notaElem ? notaElem.value : "",
+                urgente: urgenteElem ? urgenteElem.checked : false,
+                metodo_pago: metodoPagoSeleccionado,
+                cliente_cedula: cedulaElem ? cedulaElem.value.trim() : "" // <--- ENVIAMOS LA CÉDULA
             })
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error("Error del servidor: " + res.status);
+            return res.json();
+        })
         .then(data => {
             if(data.status === 'ok') {
-                alert("✅ Pedido enviado a cocina");
+                let idOrden = data.id_pedido || "Nuevo";
+                alert(`✅ ¡Orden #${idOrden} Confirmada!\nCliente registrado.`);
+                
+                // Limpiar campo cédula también al volver
+                if(cedulaElem) cedulaElem.value = ""; 
                 volverAMesas();
-            } else { alert("Error: " + data.msg); }
+            } else { 
+                alert("❌ Error: " + (data.message || data.msg || "Desconocido")); 
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("❌ Error de conexión.");
+        })
+        .finally(() => {
+            if(btn) {
+                btn.innerHTML = '<i class="bi bi-send-check-fill me-2"></i> CONFIRMAR PEDIDO';
+                btn.disabled = false;
+            }
         });
     }
-    // --- FUNCIÓN PARA MOSTRAR/OCULTAR TICKET ---
+
+
+    // --- FUNCIÓN 6: MOSTRAR/OCULTAR TICKET (Móvil) ---
     function toggleTicket() {
         const menu = document.getElementById('columna-menu');
         const ticket = document.getElementById('columna-ticket');
-        const btnAbrir = document.getElementById('btn-abrir-ticket');
-
+        
         if (ticket.classList.contains('d-none')) {
-            // MOSTRAR TICKET
-            ticket.classList.remove('d-none');     // Aparece el ticket
-            menu.classList.remove('col-lg-12');    // El menú deja de ser ancho completo
-            menu.classList.add('col-lg-7');        // El menú vuelve al 60%
-            btnAbrir.classList.add('d-none');      // Ocultamos el botón de abrir
+            ticket.classList.remove('d-none');
+            menu.classList.remove('col-lg-12');
+            menu.classList.add('col-lg-7');
         } else {
-            // OCULTAR TICKET (Cerrar)
-            ticket.classList.add('d-none');        // Desaparece el ticket
-            menu.classList.remove('col-lg-7');     // Quitamos el ancho del 60%
-            menu.classList.add('col-lg-12');       // El menú ocupa el 100%
-            btnAbrir.classList.remove('d-none');   // Mostramos el botón para volver a abrir
+            ticket.classList.add('d-none');
+            menu.classList.remove('col-lg-7');
+            menu.classList.add('col-lg-12');
         }
     }
 </script>
