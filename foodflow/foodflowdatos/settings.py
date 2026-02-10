@@ -136,3 +136,8 @@ LOGOUT_REDIRECT_URL = 'login'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Esto activa WhiteNoise para que los estilos funcionen en internet
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
